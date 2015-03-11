@@ -27,6 +27,15 @@ if (( ! found && $+commands[brew] )); then
     source "$file"
     found=1
   fi
+  function _j() {
+    compdef j
+    cur=${words[2, -1]}
+
+    autojump --complete ${=cur[*]} | while read i; do
+       compadd -U "$i";
+       done
+  }
+  compdef _j j
 fi
 
 (( ! found )) && echo '[oh-my-zsh] autojump not found. Please install it first.'
