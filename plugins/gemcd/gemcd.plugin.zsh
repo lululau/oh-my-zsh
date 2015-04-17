@@ -1,5 +1,5 @@
 function gemcd() {
-  cd "$(rvm gemdir)/gems/$@"
+  cd "$(rvm gemdir)/gems/$1"
 }
 
 function _gemcd_completion() {
