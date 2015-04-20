@@ -1,9 +1,9 @@
 function gemcd() {
-  cd "$(rvm gemdir)/gems/$1"
+  cd "$GEM_HOME/gems/$1"
 }
 
 function _gemcd_completion() {
-  _values _ $(ls "$(rvm gemdir)/gems")
+  _values _ $(ls "$GEM_HOME/gems")
   ret=0
 }
 
