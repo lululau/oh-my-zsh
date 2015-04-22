@@ -3,7 +3,7 @@ function gemcd() {
 }
 
 function _gemcd_completion() {
-  _values _ $(ls "$GEM_HOME/gems")
+  _alternative "files:file:_path_files -W $GEM_HOME/gems/ -/"
   ret=0
 }
 
