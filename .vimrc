@@ -8,6 +8,9 @@ filetype off " required by vundle
 set runtimepath+=~/.vim/bundle/vundle/
 " set runtimepath+=$GOROOT/misc/vim
 
+let $GEM_HOME = '/Users/liuxiang/.rvm/gems/ruby-2.2-head'
+let $GEM_PATH = '/Users/liuxiang/.rvm/gems/ruby-2.2.0-head:/Users/liuxiang/.rvm/gems/ruby-2.2-head@global'
+
 call vundle#rc()
 
 " vim-scripts repos
@@ -65,8 +68,7 @@ Bundle 'jnwhiteh/vim-golang'
 Bundle 'wting/rust.vim'
 Bundle 'toggle_maximize.vim'
 Bundle 'rizzatti/dash.vim'
-Plugin 'szw/vim-ctrlspace'
-Plugin 'sjl/gundo.vim'
+" Plugin 'szw/vim-ctrlspace'
 Plugin 'tmhedberg/indent-motion'
 Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'guns/vim-clojure-static'
@@ -74,11 +76,20 @@ Plugin 'tpope/vim-bundler'
 Plugin 'msanders/cocoa.vim'
 Plugin 'DrawIt'
 Plugin 'rcyrus/snipmate-snippets-rubymotion'
+Plugin 'lululau/my-text-objects'
+Plugin 'jgdavey/vim-blockle'
+" Plugin 'blueyed/vim-diminactive'
+Plugin 'tpope/vim-endwise'
+Plugin 'vim-perl/vim-perl'
+Plugin 'justinmk/vim-ipmotion'
+Plugin 'chrisbra/csv.vim'
 
 set hidden
 
 let g:airline_exclude_preview = 1
 let g:multi_cursor_quit_key='<c-c>'
+
+let g:blockle_mapping = '<Leader>bb'
 
 set t_Co=256
 set background=dark
@@ -101,7 +112,6 @@ set nocompatible
 set nu
 set ruler
 set nobackup
-set fdm=marker
 set bs=2
 set backspace=indent,eol,start   " Allow backspacing over everything in insert mode
 set diffopt+=iwhite              " Ignore whitespaces with vimdiff
@@ -119,7 +129,7 @@ set modeline
 set fillchars-=vert:\|
 
 set cursorline                   " Highlight current line
-" highlight clear SignColumn       " SignColumn should match background for things
+highlight clear SignColumn       " SignColumn should match background for things
                                  " like vim-gitgutter
 highlight clear LineNr
 highlight LineNr ctermfg=10
@@ -146,7 +156,7 @@ set hlsearch
 set incsearch
 set ignorecase
 
-let g:fugitive_github_domains = ['http://github.umeng.com']
+let g:fugitive_github_domains = ['http://github.umeng.com', 'http://gitlab.alibaba-inc.com']
 
 
 " vim-powerline configurations
@@ -172,6 +182,10 @@ let g:airline_symbols.space = ' '
 let g:airline_symbols.branch = '⭠'
 let g:airline_symbols.readonly = '⭤'
 let g:airline_symbols.linenr = '⭡'
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = ' '
+let g:airline#extensions#tabline#formatter = 'unique_tail'
 
 " let g:airline_left_sep = '▶'
 " let g:airline_left_alt_sep = '❯'
@@ -196,15 +210,37 @@ set undoreload=10000
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " MISC KEY MAPS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-imap <c-c> <ESC>
+
+function! GotoBuffer(buf)
+  let s:visible_buffers = airline#extensions#tabline#buflist#list()
+  let s:current_buffer = bufnr("%")
+  let s:current_buffer_index = index(s:visible_buffers, s:current_buffer)
+  if a:buf == '>'
+
+    if s:current_buffer_index == len(s:visible_buffers) - 1
+      let s:buf_num = s:visible_buffers[0]
+    else
+      let s:buf_num = s:visible_buffers[s:current_buffer_index+1]
+    endif
+  elseif a:buf == '<'
+    let s:buf_num = s:visible_buffers[s:current_buffer_index-1]
+  elseif a:buf == 'L'
+    let s:buf_num = s:visible_buffers[-1]
+  else
+    let s:buf_num = s:visible_buffers[a:buf-1]
+  endif
+  execute 'normal :b' . s:buf_num . "\r"
+endfunction
+
+inoremap <c-c> <ESC>
 " imap jj <ESC>
 " Insert a hash rocket with <c-h>
-imap <c-h> =><space>
+inoremap <c-h> =><space>
 " Move around splits with <c-hjkl>
-map <C-k> <C-w><Up>
-map <C-j> <C-w><Down>
-map <C-l> <C-w><Right>
-map <C-h> <C-w><Left>
+noremap <C-k> <C-w><Up>
+noremap <C-j> <C-w><Down>
+noremap <C-l> <C-w><Right>
+noremap <C-h> <C-w><Left>
 " Clear the search buffer when hitting return
 function! MapCR()
   nnoremap <c-g> :nohlsearch<cr>
@@ -216,9 +252,8 @@ nnoremap <F3> :set invpaste paste?<CR>
 set pastetoggle=<F3>
 nnoremap <silent> <F4> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar>:nohl<CR>
 map <F5> :!ctags -R --languages=-javascript --exclude=.git --exclude=log --exclude=target --fields=+iaS --extra=+q .<CR>
-map <F7> :tprevious<CR>
-map <F8> :tnext<CR>
-map <F6> :GundoToggle<CR>
+nnoremap <Left> :tprevious<CR>
+nnoremap <Right> :tnext<CR>
 
 " increase number, <c-a> is prefix for tmux.
 " map <c-i> <c-a>
@@ -228,23 +263,23 @@ map <F6> :GundoToggle<CR>
 
 
 " force write and save
-cmap w!! %!sudo tee > /dev/null %
+cnoremap w!! %!sudo tee > /dev/null %
 
 let mapleader=" "
 nnoremap <leader><leader> <c-" >
-map <leader>y "*y
-map <leader>p :echo @%<cr>
+noremap <leader>y "*y
+noremap <leader>p :echo @%<cr>
 
 " Open .vimrc for quick-edit.
-map <leader>so :source $MYVIMRC<cr>
-map <leader>ss :source ./Session.vim<cr>
+noremap <leader>so :source $MYVIMRC<cr>
+noremap <leader>ss :source ./Session.vim<cr>
 
 " Some helpers to edit mode
 cnoremap %% <C-R>=expand('%:h').'/'<cr>
-map <leader>ew :e %%
-map <leader>es :sp %%
-map <leader>ev :vsp %%
-map <leader>et :tabe %%
+noremap <leader>ew :e %%
+noremap <leader>es :sp %%
+noremap <leader>ev :vsp %%
+noremap <leader>et :tabe %%
 
 " remember last location when open a file
 autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$")
@@ -267,13 +302,13 @@ function! RenameFile()
         redraw!
     endif
 endfunction
-map <leader>n :call RenameFile()<cr>
+" noremap <leader>n :call RenameFile()<cr>
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " CLOSE QUICKFIX WINDOW
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-map <leader>cc :ccl<cr>
+noremap <leader>cc :ccl<cr>
 au FileType qf call AdjustWindowHeight(3, 10)
 function! AdjustWindowHeight(minheight, maxheight)
   exe max([min([line("$"), a:maxheight]), a:minheight]) . "wincmd _"
@@ -286,8 +321,8 @@ let g:SuperTabDefaultCompletionType = "<c-n>"
 
 
 " vim-gitgutter configurations
-map <leader>ggn :GitGutterNextHunk<cr>
-map <leader>ggp :GitGutterPrevHunk<cr>
+noremap <leader>ggn :GitGutterNextHunk<cr>
+noremap <leader>ggp :GitGutterPrevHunk<cr>
 
 
 " bufExplorer configurations
@@ -296,9 +331,9 @@ let g:bufExplorerShowRelativePath=1 " BufExplorer: show relative paths
 
 
 " rails.vim configurations
-map <leader>c :Rcontroller<cr>
-map <leader>v :Rview<cr>
-map <leader>m :Rmodel<cr>
+noremap <leader>c :Rcontroller<cr>
+noremap <leader>v :Rview<cr>
+noremap <leader>m :Rmodel<cr>
 " map <leader>h :Rhelper<cr>
 
 " gist-vim configurations
@@ -308,7 +343,13 @@ let g:gist_open_browser_after_post = 1
 let g:gist_detect_filetype = 1
 
 " vim-easymotion configurations
-let g:EasyMotion_leader_key = '\\'
+" let g:EasyMotion_leader_key = '\\'
+let g:EasyMotion_mapping_f = 't'
+let g:EasyMotion_mapping_F = 'T'
+let g:EasyMotion_mapping_j = '<leader>j'
+let g:EasyMotion_mapping_k = '<leader>k'
+let g:EasyMotion_mapping_n = '<leader>n'
+let g:EasyMotion_mapping_N = '<leader>N'
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -378,22 +419,22 @@ let g:syntastic_style_warning_symbol = '≈'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Tabularize.vim CONFIGURATIONS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-nmap <Leader>t& :Tabularize /&<CR>
-vmap <Leader>t& :Tabularize /&<CR>
-nmap <Leader>t/ :Tabularize /\/\/<CR>
-vmap <Leader>t/ :Tabularize /\/\/<CR>
-nmap <Leader>t= :Tabularize /=<CR>
-vmap <Leader>t= :Tabularize /=<CR>
-nmap <Leader>t# :Tabularize /#<CR>
-vmap <Leader>t# :Tabularize /#<CR>
-nmap <Leader>t: :Tabularize /:<CR>
-vmap <Leader>t: :Tabularize /:<CR>
-nmap <Leader>t:: :Tabularize /:\zs<CR>
-vmap <Leader>t:: :Tabularize /:\zs<CR>
-nmap <Leader>t, :Tabularize /,<CR>
-vmap <Leader>t, :Tabularize /,<CR>
-nmap <Leader>t<Bar> :Tabularize /<Bar><CR>
-vmap <Leader>t<Bar> :Tabularize /<Bar><CR>
+nnoremap <Leader>t& :Tabularize /&<CR>
+vnoremap <Leader>t& :Tabularize /&<CR>
+nnoremap <Leader>t/ :Tabularize /\/\/<CR>
+vnoremap <Leader>t/ :Tabularize /\/\/<CR>
+nnoremap <Leader>t= :Tabularize /=<CR>
+vnoremap <Leader>t= :Tabularize /=<CR>
+nnoremap <Leader>t# :Tabularize /#<CR>
+vnoremap <Leader>t# :Tabularize /#<CR>
+nnoremap <Leader>t: :Tabularize /:<CR>
+vnoremap <Leader>t: :Tabularize /:<CR>
+nnoremap <Leader>t:: :Tabularize /:\zs<CR>
+vnoremap <Leader>t:: :Tabularize /:\zs<CR>
+nnoremap <Leader>t, :Tabularize /,<CR>
+vnoremap <Leader>t, :Tabularize /,<CR>
+nnoremap <Leader>t<Bar> :Tabularize /<Bar><CR>
+vnoremap <Leader>t<Bar> :Tabularize /<Bar><CR>
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -440,7 +481,13 @@ imap <silent><c-l> <Plug>(neosnippet_expand)
 smap <silent><c-l> <Plug>(neosnippet_expand)
 imap <silent><c-j> <Plug>(neosnippet_jump)
 smap <silent><c-j> <Plug>(neosnippet_jump)
-inoremap <expr><CR>  neocomplcache#smart_close_popup() . "\<CR>"
+
+function! s:my_crinsert()
+    return pumvisible() ? neocomplcache#close_popup() : "\<Cr>"
+endfunction
+inoremap <silent> <expr><CR> <C-R>=<SID>my_crinsert()<CR>
+
+" inoremap <expr><CR>  neocomplcache#smart_close_popup() . "\<CR>"
 inoremap <expr><C-e>  neocomplcache#close_popup()
 inoremap <expr><C-y>  neocomplcache#cancel_popup()
 inoremap <expr><C-c>  neocomplcache#cancel_popup()
@@ -477,10 +524,10 @@ function! ShowRoutes()
 " Delete empty trailing line
   :normal dd
 endfunction
-map <leader>gR :call ShowRoutes()<cr>
+noremap <leader>gR :call ShowRoutes()<cr>
 
-map <leader>gg :vsplit Gemfile<cr>
-map <leader>gr :vsplit config/routes.rb<cr>
+noremap <leader>gg :vsplit Gemfile<cr>
+noremap <leader>gr :vsplit config/routes.rb<cr>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Command-T CONFIGURATIONS
@@ -490,11 +537,6 @@ let g:CommandTCancelMap=['<Esc>', '<C-c>']
 " let g:CommandTAcceptSelectionSplitMap=['<c-s>', '<c-CR>']
 let g:CommandTMaxHeight=20
 " silent! nnoremap <unique> <silent> <Leader>b :CommandTBuffer<CR>
-map <leader>t :CommandT<cr>
-map <leader>f :CommandTFlush<cr>\|:CommandT<cr>
-map <leader>t :CommandT<cr>
-map <leader>F :CommandTFlush<cr>\|:CommandT %%<cr>
-map <leader>ga :CommandTFlush<cr>\|:CommandT app/assets<cr>
 map <leader>gv :CommandTFlush<cr>\|:CommandT app/views<cr>
 map <leader>gc :CommandTFlush<cr>\|:CommandT app/controllers<cr>
 map <leader>gm :CommandTFlush<cr>\|:CommandT app/models<cr>
@@ -574,17 +616,32 @@ let NERDTreeAutoCenter=1
 let NERDTreeChDirMode=2
 let g:NERDTreeMinimalUI=1
 map <F1> :NERDTreeToggle<CR>
+map <ESC>[1;2P :NERDTreeFind<CR>
 
 
 " ack.vim configuration
 if executable("ack")
     " ,a to Ack (search in files)
-    nnoremap <leader>a :Ack
+    nnoremap <leader>A :Ack<space>
+    vnoremap <leader>A y:Ack <c-r>" 
+    function! AckOperator(type)
+      echo a:type
+      if a:type ==# 'char'
+        let saved_reg = @@
+        normal! `[v`]y
+        call feedkeys(":Ack " . @@ . " ")
+        let @@ = saved_reg
+      else
+        return
+      end
+    endfunction
+    nnoremap <silent> <leader>a :set opfunc=AckOperator<CR>g@
+
     let g:ackprg="ack -H --smart-case --nocolor --nogroup --column --ignore-dir=.binstubs --ignore-dir=vendor --ignore-dir=log --ignore-dir=tags --ignore-dir=tmp --ignore-file=is:Session.vim --ignore-file=is:tags"
     let g:ackhighlight=1
 endif
-map <leader>cn :cn<cr>
-map <leader>cp :cp<cr>
+nnoremap + :cn<cr>
+nnoremap _ :cp<cr>
 
 
 " vim-javascript configuration
@@ -613,93 +670,100 @@ autocmd FileType go,c,rust set ts=4 sw=4 sts=4 et
 set mouse=a
 
 cnoremap vh vert leftabove help 
-imap <c-c> <ESC>
-map <c-x><c-c> <ESC>:qa<CR>
-imap <c-x><c-c> <ESC>:qa<CR>
-map <c-x><c-x> <ESC>:qa!<CR>
-imap <c-x><c-x> <ESC>:qa!<CR>
-map <c-x><c-s> <ESC>:w<CR>
-imap <c-x><c-s> <c-o>:w<CR>
-smap <c-x><c-s> <c-o>:w<CR>
-map <c-x><c-k> :bw!<CR>
-imap <c-x><c-k> <ESC>:bw!<CR>
-map <c-x>k <Nul>c<Nul>
-imap <c-x>k <esc><ESC><Nul>c<Nul>
-" map <c-x><c-b> <Nul>a
-" imap <c-x><c-b> <ESC><ESC><Nul>a
-map <c-x><c-b> <ESC>:CommandTBuffer<CR>
-imap <c-x><c-b> <ESC>:CommandTBuffer<CR>
-map <c-x>b <ESC>:CommandTMRU<CR>
-imap <c-x>b <ESC>:CommandTMRU<CR>
-map <c-x><c-f> <ESC>:CommandT<CR>
-imap <c-x><c-f> <ESC>:CommandT<CR>
-map <esc><cr> o<ESC>
-cmap <c-p> <up>
-cmap <c-n> <down>
-map <C-h> <C-w><Left>
-imap end end<ESC><ESC>
-imap <c-e> <c-o>A
-imap <c-a> <c-o>^
-imap <c-f> <Right>
-imap <c-b> <Left>
-imap <c-n> <Down>
-imap <c-p> <Up>
-imap <c-d> <Del>
-imap <c-k> <c-o>C
-imap <esc>f <c-o>e
-cmap <esc>f <S-Right>
-imap <esc>b <c-o>b
-cmap <esc>b <S-Left>
-imap <esc>< <c-o>gg<c-o>0
-imap <esc>> <c-o>G<c-o>$
-cmap <c-b> <Left>
-cmap <c-f> <Right>
+inoremap <c-c> <ESC>
+nnoremap <c-c> <ESC>
+nnoremap <c-x><c-c> <ESC>:qa<CR>
+inoremap <c-x><c-c> <ESC>:qa<CR>
+noremap <c-x><c-x> <ESC>:qa!<CR>
+inoremap <c-x><c-x> <ESC>:qa!<CR>
+noremap <c-x><c-s> <ESC>:w<CR>
+inoremap <c-x><c-s> <c-o>:w<CR>
+snoremap <c-x><c-s> <c-o>:w<CR>
+noremap <c-x><c-k> :bw!<CR>
+inoremap <c-x><c-k> <ESC>:bw!<CR>
+
+noremap <c-x><c-b> <ESC>:CommandTBuffer<CR>
+inoremap <c-x><c-b> <ESC>:CommandTBuffer<CR>
+noremap <c-x>b <ESC>:CommandTMRU<CR>
+inoremap <c-x>b <ESC>:CommandTMRU<CR>
+noremap <c-x><c-f> <ESC>:CommandT<CR>
+inoremap <c-x><c-f> <ESC>:CommandT<CR>
+noremap <esc><cr> o<ESC>
+cnoremap <c-p> <up>
+cnoremap <c-n> <down>
+noremap <C-h> <C-w><Left>
+inoremap <c-e> <c-o>A
+inoremap <c-a> <c-o>^
+inoremap <c-f> <Right>
+inoremap <c-b> <Left>
+inoremap <c-n> <Down>
+inoremap <c-p> <Up>
+inoremap <c-d> <Del>
+inoremap <c-k> <c-o>C
+inoremap <esc>f <c-o>e
+cnoremap <esc>f <S-Right>
+inoremap <esc>b <c-o>b
+cnoremap <esc>b <S-Left>
+inoremap <esc>< <c-o>gg<c-o>0
+inoremap <esc>> <c-o>G<c-o>$
+cnoremap <c-b> <Left>
+cnoremap <c-f> <Right>
 cnoremap <c-a> <c-b>
 
-map <esc>w <c-w>
-imap <esc>w <c-w>
-imap <esc><bs> <esc><esc>caw
-cmap <esc><bs> <c-w>
+noremap <esc>w <c-w>
+inoremap <esc>w <c-w>
+inoremap <esc><bs> <esc><esc>caw
+cnoremap <esc><bs> <c-w>
 
-map <Leader>G <ESC>:Gblame<CR>
-imap <ESC>0 <ESC><Nul>0<Nul>
-imap <ESC>1 <ESC><Nul>1<Nul>
-imap <ESC>2 <ESC><Nul>2<Nul>
-imap <ESC>3 <ESC><Nul>3<Nul>
-imap <ESC>4 <ESC><Nul>4<Nul>
-imap <ESC>5 <ESC><Nul>5<Nul>
-imap <ESC>6 <ESC><Nul>6<Nul>
-imap <ESC>7 <ESC><Nul>7<Nul>
-imap <ESC>8 <ESC><Nul>8<Nul>
-imap <ESC>9 <ESC><Nul>9<Nul>
-imap <ESC>, <ESC><Nul>[<Nul>
-imap <ESC>. <ESC><Nul>]<Nul>
-map <ESC>0 <Nul>0<Nul>
-map <ESC>1 <Nul>1<Nul>
-map <ESC>2 <Nul>2<Nul>
-map <ESC>3 <Nul>3<Nul>
-map <ESC>4 <Nul>4<Nul>
-map <ESC>5 <Nul>5<Nul>
-map <ESC>6 <Nul>6<Nul>
-map <ESC>7 <Nul>7<Nul>
-map <ESC>8 <Nul>8<Nul>
-map <ESC>9 <Nul>9<Nul>
-map <ESC>, <Nul>[<Nul>
-map <ESC>. <Nul>]<Nul>
+nnoremap <Leader>gB <ESC>:Gblame<CR>
+nnoremap <Leader>gb <ESC>:Git branch -vv<CR>
+nnoremap <Leader>gll <ESC>:Git log<CR>
+nnoremap <Leader>glp <ESC>:Git log -p<CR>
+nnoremap <Leader>gco <ESC>:Git checkout -
+nnoremap <Leader>gci <ESC>:Git commit -am ''<Left>
+nnoremap <Leader>gs <ESC>:Git status<CR>
+nnoremap <Leader>gdd <ESC>:Git diff<CR>
+nnoremap <Leader>gdc <ESC>:Git diff --cached<CR>
+nnoremap <Leader>gdt <ESC>:Git difftool<CR>
+nnoremap <Leader>gps <ESC>:Git push 
+nnoremap <Leader>gpl <ESC>:Git pull<CR>
 imap <Nul> <Nop>
 inoremap <c-^> <ESC><c-^>
 noremap <ESC><TAB> <c-^>
 inoremap <ESC><TAB> <ESC><c-^>
-map <c-x>m <esc>:<c-f>i
-map <c-x><c-m> <esc>:<c-f>
-imap <c-x>m <esc>:<c-f>i
-imap <c-x><c-m> <esc>:<c-f>
-map 👿  <Nul>apg<Nul>
-imap 👿  <ESC><Nul>apg<Nul>
-smap 👿  <ESC><ESC><Nul>apg<Nul>
-cnoremap mfd new \| :0r !mfd 
-noremap gf <s-v>gf
-cmap sudow w ! sudo tee %
+noremap <ESC>1 :call GotoBuffer(1)<CR>
+noremap <ESC>2 :call GotoBuffer(2)<CR>
+noremap <ESC>3 :call GotoBuffer(3)<CR>
+noremap <ESC>4 :call GotoBuffer(4)<CR>
+noremap <ESC>5 :call GotoBuffer(5)<CR>
+noremap <ESC>6 :call GotoBuffer(6)<CR>
+noremap <ESC>7 :call GotoBuffer(7)<CR>
+noremap <ESC>8 :call GotoBuffer(8)<CR>
+noremap <ESC>9 :call GotoBuffer(9)<CR>
+noremap <ESC>0 :call GotoBuffer("L")<CR>
+noremap <ESC>= :call GotoBuffer(">")<CR>
+noremap <ESC>- :call GotoBuffer("<")<CR>
+noremap <ESC>t :enew<CR>
+noremap <ESC>x :bd<CR>
+noremap <ESC>X :bd!<CR>
+inoremap <ESC>1 <ESC>:call GotoBuffer(1)<CR>
+inoremap <ESC>2 <ESC>:call GotoBuffer(2)<CR>
+inoremap <ESC>3 <ESC>:call GotoBuffer(3)<CR>
+inoremap <ESC>4 <ESC>:call GotoBuffer(4)<CR>
+inoremap <ESC>5 <ESC>:call GotoBuffer(5)<CR>
+inoremap <ESC>6 <ESC>:call GotoBuffer(6)<CR>
+inoremap <ESC>7 <ESC>:call GotoBuffer(7)<CR>
+inoremap <ESC>8 <ESC>:call GotoBuffer(8)<CR>
+inoremap <ESC>9 <ESC>:call GotoBuffer(9)<CR>
+inoremap <ESC>0 <ESC>:call GotoBuffer("L")<CR>
+inoremap <ESC>= <ESC>:call GotoBuffer(">")<CR>
+inoremap <ESC>- <ESC>:call GotoBuffer("<")<CR>
+inoremap <ESC>t <ESC>:enew<CR>
+inoremap <ESC>x <ESC>:bd<CR>
+inoremap <ESC>X <ESC>:bd!<CR>
+cnoremap sudow w ! sudo tee %
+nmap <silent> <Up> :silent! normal ddkP<CR>
+nmap <Down> ddp
 
 " Search for selected text, forwards or backwards.
 vnoremap <silent> * :<C-U>
@@ -738,59 +802,6 @@ autocmd FileType lisp,clojure let b:AutoClosePairs = AutoClose#DefaultPairsModif
 
 colorscheme base16-railscasts
 
-highlight clear SignColumn
-highlight VertSplit    ctermbg=236
-highlight ColorColumn  ctermbg=237
-highlight LineNr       ctermbg=236 ctermfg=240
-highlight SignColumn ctermbg=236
-highlight CursorLineNr ctermbg=236 ctermfg=240
-highlight CursorLine   ctermbg=236
-highlight StatusLineNC ctermbg=236 ctermfg=0
-highlight StatusLine   ctermbg=240 ctermfg=12
-highlight IncSearch    ctermbg=3   ctermfg=1
-highlight Search       ctermbg=1   ctermfg=3
-highlight Visual       ctermbg=3   ctermfg=0
-highlight Pmenu        ctermbg=240 ctermfg=12
-highlight PmenuSel     ctermbg=2   ctermfg=0
-highlight SpellBad     ctermbg=0   ctermfg=1
-highlight TabLine ctermbg=237 ctermfg=240
-highlight TabLineFill ctermbg=237 ctermfg=240
-highlight TabLineSel ctermbg=237 ctermfg=10
-
-hi default ShowMarksHLl ctermfg=darkblue ctermbg=22 cterm=bold guifg=blue guibg=lightblue gui=bold
-hi default ShowMarksHLu ctermfg=darkblue ctermbg=23 cterm=bold guifg=blue guibg=lightblue gui=bold
-hi default ShowMarksHLo ctermfg=darkblue ctermbg=24 cterm=bold guifg=blue guibg=lightblue gui=bold
-hi default ShowMarksHLm ctermfg=darkblue ctermbg=29 cterm=bold guifg=blue guibg=lightblue gui=bold
-
-
-hi CtrlSpaceSelected term=reverse ctermfg=232   guifg=#d7d7af ctermbg=2    guibg=#005f5f cterm=bold gui=bold
-hi CtrlSpaceNormal   term=NONE    ctermfg=12   guifg=#808080 ctermbg=236   guibg=#080808 cterm=NONE gui=NONE
-hi CtrlSpaceSearch   ctermfg=220  guifg=#ffd700 ctermbg=NONE  guibg=NONE    cterm=bold    gui=bold
-hi CtrlSpaceStatus   ctermfg=230  guifg=#ffffd7 ctermbg=240   guibg=#1c1c1c cterm=NONE    gui=NONE
-
-highlight GitGutterAdd ctermbg=236
-highlight GitGutterAddDefault ctermbg=236
-highlight GitGutterAddInvisible ctermbg=236
-highlight GitGutterAddLine ctermbg=236
-highlight GitGutterChange ctermbg=236
-highlight GitGutterChangeDefault ctermbg=236
-highlight GitGutterChangeDelete ctermbg=236
-highlight GitGutterChangeDeleteDefault ctermbg=236
-highlight GitGutterChangeDeleteInvisible ctermbg=236
-highlight GitGutterChangeDeleteLine ctermbg=236
-highlight GitGutterChangeInvisble ctermbg=236
-highlight GitGutterChangeInvisible ctermbg=236
-highlight GitGutterChangeLine ctermbg=236
-highlight GitGutterChangeLineDefault ctermbg=236
-highlight GitGutterDelete ctermbg=236
-highlight GitGutterDeleteDefault ctermbg=236
-highlight GitGutterDeleteInvisible ctermbg=236
-
-highlight SyntasticErrorSign ctermbg=236
-highlight SyntasticStyleErrorSign ctermbg=236
-highlight SyntasticStyleWarningSign ctermbg=236
-highlight SyntasticWarningSign ctermbg=236
-
 let g:ctrlspace_save_workspace_on_exit = 1
 let g:gitguwtter_sign_column_always = 1
 
@@ -803,26 +814,7 @@ endif
 " let $XIKI_DIR = "/Users/liuxiang/cascode/github.com/xiki"
 " source /Users/liuxiang/cascode/github.com/xiki/etc/vim/xiki.vim
 
-function! SelectOnlyAlphanum(type)
-  let saved_iskeyword = &l:iskeyword 
-  if a:type ==# "o"
-    let &l:iskeyword = "48-57,a-z,A-Z,192-255"
-  else
-    let &l:iskeyword = "@,48-57,_,128-167,224-235,45"
-  endif
-  normal viw
-  let &l:iskeyword = saved_iskeyword
-endfunction
-
-vnoremap <silent> io :<C-U>silent! call SelectOnlyAlphanum("o")<CR>
-vnoremap <silent> ao :<C-U>silent! call SelectOnlyAlphanum("o")<CR>
-omap io :normal vio<CR>
-omap ao :normal vao<CR>
-
-vnoremap <silent> iO :<C-U>silent! call SelectOnlyAlphanum("O")<CR>
-vnoremap <silent> aO :<C-U>silent! call SelectOnlyAlphanum("O")<CR>
-omap iO :normal viO<CR>
-omap aO :normal vaO<CR>
+iabbrev pry require 'pry'; binding.pry;<ESC>
 
 function! GotoBeginningOf(type, ...)
   normal `[
@@ -838,8 +830,8 @@ function! GotoEndOf(type, ...)
   endif
 endfunction
  
-nmap <silent> <leader>> :set opfunc=GotoEndOf<CR>g@
-nmap <silent> <leader>< :set opfunc=GotoBeginningOf<CR>g@
+nnoremap <silent> <leader>> :set opfunc=GotoEndOf<CR>g@
+nnoremap <silent> <leader>< :set opfunc=GotoBeginningOf<CR>g@
 fu! CustomFoldText()
    "get first non-blank line
    let fs = v:foldstart
@@ -860,6 +852,17 @@ fu! CustomFoldText()
    let expansionString = repeat(".", w - strwidth(foldSizeStr.line.foldLevelStr.foldPercentage))
    return line . expansionString . foldSizeStr . foldPercentage . foldLevelStr
 endf
-" set fdm=syntax
-" set fdls=99
-" set foldtext=CustomFoldText()
+set foldtext=CustomFoldText()
+
+function! ToggleFolding()
+  if &l:foldmethod == 'syntax'
+    let &l:foldmethod = 'manual'
+  else
+    let &l:foldmethod = 'syntax'
+    let &l:foldlevel = 99
+  endif
+endfunction
+
+noremap <F4> :call ToggleFolding()<CR>
+inoremap <F4> <c-o>:call ToggleFolding()<CR>
+

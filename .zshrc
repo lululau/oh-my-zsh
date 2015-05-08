@@ -28,7 +28,7 @@ export CLICOLOR=1
 # export LSCOLORS=ExFxCxDxBxegedabagacad
 export LANG=zh_CN.UTF-8
 export MAGICK_HOME=/opt/local
-PATH=/Users/liuxiang/Applications/Postgres.app/Contents/MacOS/bin:/Users/liuxiang/casecode/mygithub/rakudo/parrot_install/bin:$PATH:/usr/local/mysql/bin
+PATH=/Users/liuxiang/Applications/Postgres.app/Contents/MacOS/bin:/Users/liuxiang/casecode/mygithub/rakudo/parrot_install/bin:$PATH:/usr/local/mysql/bin:/Users/liuxiang/cascode/github.com/xiki/bin
 # export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
 export GOROOT=$HOME/go
 export GOOS=darwin
@@ -68,7 +68,6 @@ alias aaaaaa='cd ../../../../../../'
 alias aaaaaaa='cd ../../../../../../../'
 alias aaaaaaaa='cd ../../../../../../../../'
 alias aaaaaaaaa='cd ../../../../../../../../../'
-alias jj='j -s'
 alias rspec='rspec -I. -fd --color'
 alias vih="sudo vim /etc/hosts"
 export PAGER='less -R'
@@ -155,6 +154,11 @@ function omz_termsupport_preexec () {
 }
 
 
+function jj() {
+  cd "$(j -s | gsed -n '/^_______/!p; /^_______/q'  | cut -d$'\t' -f2 | fzf)"
+}
+
+
 export LSCOLORS=exfxcxdxcxegedabagacad
 
 PERL_MB_OPT="--install_base \"/Users/liuxiang/perl5\""; export PERL_MB_OPT;
@@ -175,3 +179,27 @@ fi
 set -o interactivecomments
 export NULLCMD=:
 function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+export FZF_DEFAULT_OPTS='-x -m'
+
+function command_not_found_handler() {
+  if [ $# -gt 0  ] && echo $1 | grep -q '^[0-9]\{6\}$'; then
+    if [ -n "$2" ] && echo $2 | grep -q '^[0-9]$'; then
+      session="session $2"
+    else
+      session="session 1"
+    fi
+    if [ -n "$ITERM_PROFILE" ]; then
+      session='current session'
+    fi
+    osascript <<EOF
+tell app "iTerm" to tell $session of first terminal to write text "alibas admin@web1 $1"
+EOF
+  else
+    return 127
+  fi
+}
+
+
+source ~/.xsh
+
