@@ -42,7 +42,7 @@ function josh_prompt {
   # prompt="%{%F{green}%}$PWD$prompt%{%F{red}%}$(rvm_prompt_info || rbenv_prompt_info)%{$reset_color%} $(git_prompt_info)"
   prompt="%{$fg_bold[green]%}➜  %{$fg_bold[green]%}${rvm_prompt_info}%{$fg_bold[red]%}%{$fg_bold[green]%}%p %{$fg[cyan]%}%~ %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}$prompt"
 
-  echo $prompt
+  echo "$prompt"
 }
 
 setopt prompt_subst
