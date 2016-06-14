@@ -610,14 +610,23 @@ __gitcomp_file ()
 # argument, and using the options specified in the second argument.
 __git_ls_files_helper ()
 {
-	if [ "$2" == "--committable" ]; then
-		__git -C "$1" -c core.quotePath=false diff-index \
-			--name-only --relative HEAD -- "${3//\\/\\\\}*"
-	else
-		# NOTE: $2 is not quoted in order to support multiple options
-		__git -C "$1" -c core.quotePath=false ls-files \
-			--exclude-standard $2 -- "${3//\\/\\\\}*"
-	fi
+	# if [ "$2" == "--committable" ]; then
+	# 	__git -C "$1" -c core.quotePath=false diff-index \
+	# 		--name-only --relative HEAD -- "${3//\\/\\\\}*"
+	# else
+	# 	# NOTE: $2 is not quoted in order to support multiple options
+	# 	__git -C "$1" -c core.quotePath=false ls-files \
+	# 		--exclude-standard $2 -- "${3//\\/\\\\}*"
+	# fi
+	(
+		test -n "${CDPATH+set}" && unset CDPATH
+		if [ "$2" == "--committable" ]; then
+			git diff-index --name-only --relative HEAD "$1"
+		else
+			# NOTE: $2 is not quoted in order to support multiple options
+			git ls-files --exclude-standard $2 "$1"
+		fi
+	) 2>/dev/null
 }
 
 
