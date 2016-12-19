@@ -40,7 +40,7 @@ function josh_prompt {
   local rvm_prompt_info=$(rvm-prompt | perl -F@ -ane '$F[0]=~s#[^\d\.]*([\d\.]+).*#$1#g;print "$F[0]"; print "\@$F[1]" if $F[1]; print "\n"')
 
   # prompt="%{%F{green}%}$PWD$prompt%{%F{red}%}$(rvm_prompt_info || rbenv_prompt_info)%{$reset_color%} $(git_prompt_info)"
-  prompt="%{$fg_bold[green]%}➜  %{$fg_bold[green]%}${rvm_prompt_info}%{$fg_bold[red]%}%{$fg_bold[green]%}%p %{$fg[cyan]%}%~ %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}$prompt"
+  prompt="%{$fg_bold[green]%}$([ -n "$SSH_CLIENT" ] && { hostname -s | sed 's/$/ /' ; })➜  %{$fg_bold[green]%}${rvm_prompt_info}%{$fg_bold[red]%}%{$fg_bold[green]%}%p %{$fg[cyan]%}%~ %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}$prompt"
 
   echo "$prompt"
 }
@@ -49,5 +49,5 @@ setopt prompt_subst
 
 PROMPT='
 $(josh_prompt)
-%(?,%{$fg_bold[green]%},%{$fg_bold[red]%})➜%{$reset_color%}  '
+%(?,%{$fg_bold[green]%},%{$fg_bold[red]%})$([ -n "$SSH_CLIENT" ] && { hostname -s | sed "s/$/ /" ; })➜%{$reset_color%}  '
 
