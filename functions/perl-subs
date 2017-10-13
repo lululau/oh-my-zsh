@@ -1,0 +1,17 @@
+emulate -LR zsh
+zle -R "Substitution:"
+local SEDARG=""
+local key=""
+read -k key
+local -r start=$key
+while (( (#key)!=(##\n) &&
+          (#key)!=(##\r) )) ; do
+    if (( (#key)==(##^?) || (#key)==(##^h) )) ; then
+        SEDARG=${SEDARG[1,-2]}
+    else
+        SEDARG="${SEDARG}$key"
+    fi
+    zle -R "Substitution: $SEDARG"
+    read -k key || return 1
+done
+BUFFER="$(echo $BUFFER | perl -pe "$SEDARG")"
