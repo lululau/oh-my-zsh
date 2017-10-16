@@ -230,8 +230,8 @@ zce-raw () {
 zce () { with-zce zce-raw zce-searchin-read }
 
 zle -N zce
-bindkey '^xl' zce
-bindkey -a '^xl' zce
+bindkey '^x ' zce
+bindkey -a '^x ' zce
 
 # zcompiling code.
 
