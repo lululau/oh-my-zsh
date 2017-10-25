@@ -55,7 +55,7 @@ function set-prompt () {
     case ${KEYMAP} in
       (vicmd) PROMPT='
 $(josh_prompt)
-%(?,%{$fg_bold[yellow]%},%{$fg_bold[red]%})$([ -n "$SSH_CLIENT" ] && { hostname -s | sed "s/$/ /" ; })➜%{$reset_color%}  ' ;;
+%(?,%{$fg_bold[white]%},%{$fg_bold[white]%})$([ -n "$SSH_CLIENT" ] && { hostname -s | sed "s/$/ /" ; })➜%{$reset_color%}  ' ;;
       (*) PROMPT='
 $(josh_prompt)
 %(?,%{$fg_bold[green]%},%{$fg_bold[red]%})$([ -n "$SSH_CLIENT" ] && { hostname -s | sed "s/$/ /" ; })➜%{$reset_color%}  ' ;;
