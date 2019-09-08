@@ -109,7 +109,10 @@ project_root_widget() {
     if [ -n "$root" ]; then
         cd "$root"
         local ret=$?
-        zle redisplay
+        if [ -n "$STARSHIP_SHELL" ]; then
+          starship_precmd
+        fi
+        zle reset-prompt
         typeset -f zle-line-init >/dev/null && zle zle-line-init
         return $ret
     fi
