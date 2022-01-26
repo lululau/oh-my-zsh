@@ -55,6 +55,7 @@ alias ru='rails runner'
 alias rs='rails server'
 alias rsd='rails server --debugger'
 alias rsp='rails server --port'
+alias rsb='rails server --bind'
 
 alias sprc='spring rails console'
 alias srcs='spring rails console --sandbox'
@@ -80,7 +81,10 @@ alias Sru='/usr/bin/env spring rails runner'
 
 # Rake aliases
 alias rdm='rake db:migrate'
+alias rdmr='rake db:migrate:redo'
+alias rdmd='rake db:migrate:down'
 alias rdms='rake db:migrate:status'
+alias rdmu='rake db:migrate:up'
 alias rdr='rake db:rollback'
 alias rdc='rake db:create'
 alias rds='rake db:seed'
