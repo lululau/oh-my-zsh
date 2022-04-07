@@ -36,6 +36,8 @@ function title {
       fi
       ;;
   esac
+
+  echo -ne '\e[5 q'
 }
 
 ZSH_THEME_TERM_TAB_TITLE_IDLE="%15<..<%~%<<" #15 char left truncated PWD
