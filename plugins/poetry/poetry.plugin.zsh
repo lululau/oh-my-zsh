@@ -11,4 +11,24 @@ if [[ ! -f "$ZSH_CACHE_DIR/completions/_poetry" ]]; then
   _comps[poetry]=_poetry
 fi
 
+function poe() {
+  if [ "$1" = "active" -o "$1" = "a" -o "$1" = use ]; then
+    source $(poetry env info --path)/bin/activate
+  elif [ "$1" = "deactive" -o "$1" = "d" -o "$1" = unuse ]; then
+    deactivate
+  else
+    poetry "$@"
+  fi
+}
+
+function poea() {
+  poe active
+}
+
+if [[ ! -f "$ZSH_CACHE_DIR/completions/_poe" ]]; then
+  typeset -g -A _comps
+  autoload -Uz _poe
+  _comps[poe]=_poe
+fi
+
 poetry completions zsh >| "$ZSH_CACHE_DIR/completions/_poetry" &|
