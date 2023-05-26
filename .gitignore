@@ -58,3 +58,6 @@ cscope.files
 cscope.out
 cscope.in.out
 cscope.po.out
+# editor configs
+.vscode
+.idea
