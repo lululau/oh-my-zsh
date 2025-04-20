@@ -14,4 +14,15 @@ while (( (#key)!=(##\n) &&
     zle -R "Substitution: $SEDARG"
     read -k key || return 1
 done
+if [ -n "$SEDARG" ]; then
+  if [ "$SEDARG[1]" = '/' ]; then
+     SEDARG="s$SEDARG"
+  elif [[ "$SEDARG[1,2]" != 's/' ]]; then
+     SEDARG="s/$SEDARG"
+  fi
+
+  if [[ "$SEDARG[-1]" != '/' && "$SEDARG[-2,-1]" != '/g' ]]; then
+    SEDARG="$SEDARG/g"
+  fi
+fi
 BUFFER="$(echo $BUFFER | perl -pe "$SEDARG")"
